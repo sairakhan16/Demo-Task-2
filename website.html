@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Dynamic Form</title>
+	<script>
+		function addField() {
+	var fieldContainer = document.getElementById("field-container");
+	var fieldCount = fieldContainer.children.length;
+	var newField = document.createElement("div");
+	newField.classList.add("field");
+	newField.id = "field" + (fieldCount + 1);
+	newField.innerHTML = `
+		<input type="text" name="fieldName${fieldCount + 1}" placeholder="Enter Field Name">
+		<select name="fieldType${fieldCount + 1}" class="field-type-select">
+			<option value="text">Text</option>
+			<option value="select">Drop Down (Select)</option>
+		</select>
+		<input type="text" name="field${fieldCount + 1}" placeholder="Enter Field Value">
+		<button type="button" class="remove-button" onclick="removeField(this)">Remove</button>
+	`;
+	fieldContainer.appendChild(newField);
+}
+
+function removeField(button) {
+	var field = button.parentNode;
+	field.parentNode.removeChild(field);
+	updateFieldLabels();
+}
+
+function updateFieldLabels() {
+	var fields = document.getElementsByClassName("field");
+	for (var i = 0; i < fields.length; i++) {
+		var fieldLabel = fields[i].querySelector("input[name^='fieldName']");
+		fieldLabel.setAttribute("name", `fieldName${i+1}`);
+		fieldLabel.setAttribute("placeholder", `Enter Field ${i+1} Name`);
+	}
+}
+
+function createTable(formData) {
+  var table = document.createElement("table");
+  var thead = document.createElement("thead");
+  var tbody = document.createElement("tbody");
+  var headerRow = document.createElement("tr");
+
+  var fieldHeader = document.createElement("th");
+  fieldHeader.textContent = "Field";
+  headerRow.appendChild(fieldHeader);
+
+  var answerHeader = document.createElement("th");
+  answerHeader.textContent = "Answer";
+  headerRow.appendChild(answerHeader);
+
+  for (var i = 0; i < formData.length; i++) {
+    var fieldName = formData[i].name;
+    var fieldValue = formData[i].value;
+    var fieldLabel = document.querySelector(`input[name="${fieldName}"]`).value;
+
+    var dataRow = document.createElement("tr");
+
+
+	var valueCell = document.createElement("td");
+    valueCell.textContent = fieldValue;
+    dataRow.appendChild(valueCell);
+
+    var fieldCell = document.createElement("td");
+    fieldCell.textContent = fieldLabel;
+    dataRow.appendChild(fieldCell);
+
+    
+
+    tbody.appendChild(dataRow);
+  }
+
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+  table.appendChild(tbody);
+
+  return table;
+}
+
+
+window.onload = function() {
+	var form = document.getElementById("dynamic-form");
+	form.addEventListener("submit", function(event) {
+		event.preventDefault();
+		var formData = [];
+		var fields = document.getElementsByClassName("field");
+		for (var i = 0; i < fields.length; i++) {
+			var fieldNameInput = fields[i].querySelector(`input[name^='fieldName']`);
+			var fieldName = fieldNameInput.value;
+			var fieldType = fields[i].querySelector(`select[name^='fieldType']`).value;
+			var fieldValue = fields[i].querySelector(`input[name^='field']`).value;
+			var formDataItem = {
+				name: `field${i+1}`,
+				value: fieldValue
+			};
+			formData.push(formDataItem);
+
+			var fieldLabel = fieldName;
+			if (fieldType === "select") {
+				var options = fieldValue.split(",");
+				fieldLabel += ` (${options.length} options)`;
+			}
+			fieldLabel = fieldLabel.trim();
+
+			var dataRow = document.createElement("tr");
+			var headerCell = document.createElement("th");
+			var dataCell = document.createElement("td");
+
+			headerCell.textContent = fieldLabel;
+			dataCell.textContent = fieldValue;
+
+			dataRow.appendChild(headerCell);
+			dataRow.appendChild(dataCell);
+
+			// Remove this line:
+			// document.getElementById("dynamic-form").appendChild(dataRow);
+		}
+
+		document.getElementById("table-container").innerHTML = "";
+		document.getElementById("table-container").appendChild(createTable(formData));
+	});
+}
+
+
+		
+	</script>
+	<style>
+		.field {
+			margin-bottom: 10px;
+		}
+		label {
+			display: inline-block;
+			width: 120px;
+		}
+		select, input[type="text"] {
+			width: 200px;
+		}
+		.remove-button {
+			margin-left: 10px;
+		}
+		table {
+			border-collapse: collapse;
+			margin-top: 20px;
+		}
+		th, td {
+			padding: 5px;
+			border: 1px solid black;
+		}
+		th {
+			background-color: #ccc;
+		}
+	</style>
+</head>
+<body>
+	<h1>Dynamic Form</h1>
+	<form id="dynamic-form">
+		<div id="field-container">
+			<div class="field" id="field1">
+	<input type="text" name="fieldName1" placeholder="Enter Field Name">
+	<select name="fieldType1" class="field-type-select">
+		<option value="text">Text</option>
+		<option value="select">Drop Down (Select)</option>
+	</select>
+	<input type="text" name="field1" placeholder="Enter Field Value">
+	<button type="button" class="remove-button" onclick="removeField(this)">Remove</button>
+</div>
+		</div>
+		<button type="button" id="add-field-button" onclick="addField()">Add Field</button>
+		<button type="submit">Submit</button>
+	</form>
+	<div id="table-container"></div>
+</body>
+</html>
+
